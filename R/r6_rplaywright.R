@@ -83,6 +83,7 @@ check_nodejs <- function() {
 #'
 #' @param host Rplaywright server host. Default to 127.0.0.1
 #' @param port Rplaywright server port. Default to 3000
+#' @param restart Restart server if already running
 #'
 #' @examples
 #' \dontrun{
@@ -93,7 +94,7 @@ check_nodejs <- function() {
 start_server <- function(
   host = "127.0.0.1",
   port = 3000,
-  restart = F
+  restart = FALSE
 ){
   check_nodejs()
 
@@ -145,19 +146,25 @@ stop_server <- function(){
 
 #' Launch new chromium instance
 #'
+#' @param start_server Logical. Whether to start the server automatically
+#' @param serverOptions List with host and port configuration
+#' @param headless Logical. Run browser in headless mode (TRUE) or with UI (FALSE)
+#'
 #' @examples
 #' \dontrun{
 #' browser <- rplaywright::new_chromium()
+#' browser_visible <- rplaywright::new_chromium(headless = FALSE)
 #' }
 #'
 #' @return An object of class `Browser`
 #'
 #' @export
 new_chromium <- function(
-    start_server = T,
-    serverOptions = list(host = "127.0.0.1", port = 3000)
+    start_server = TRUE,
+    serverOptions = list(host = "127.0.0.1", port = 3000),
+    headless = TRUE
 ){
-  if (start_server == T) {
+  if (start_server == TRUE) {
     if (!exists("playwright_server", envir = envpw)) {
       start_server(host = serverOptions$host, port = serverOptions$port)
       Sys.sleep(5)
@@ -169,23 +176,33 @@ new_chromium <- function(
     }
   }
 
-  Browser$new("chromium")
+  Browser$new(
+    "chromium",
+    remote_url = paste0("http://", serverOptions$host, ":", serverOptions$port),
+    headless = headless
+  )
 }
 
 
 #' Launch new firefox instance
 #'
+#' @param start_server Logical. Whether to start the server automatically
+#' @param serverOptions List with host and port configuration
+#' @param headless Logical. Run browser in headless mode (TRUE) or with UI (FALSE)
+#'
 #' @examples
 #' \dontrun{
 #' browser <- rplaywright::new_firefox()
+#' browser_visible <- rplaywright::new_firefox(headless = FALSE)
 #' }
 #'
 #' @export
 new_firefox <- function(
-    start_server = T,
-    serverOptions = list(host = "127.0.0.1", port = 3000)
+    start_server = TRUE,
+    serverOptions = list(host = "127.0.0.1", port = 3000),
+    headless = TRUE
 ){
-  if (start_server == T) {
+  if (start_server == TRUE) {
     if (!exists("playwright_server", envir = envpw)) {
       start_server(host = serverOptions$host, port = serverOptions$port)
       Sys.sleep(5)
@@ -197,23 +214,33 @@ new_firefox <- function(
     }
   }
 
-  Browser$new("firefox")
+  Browser$new(
+    "firefox",
+    remote_url = paste0("http://", serverOptions$host, ":", serverOptions$port),
+    headless = headless
+  )
 }
 
 
 #' Launch new webkit instance
 #'
+#' @param start_server Logical. Whether to start the server automatically
+#' @param serverOptions List with host and port configuration
+#' @param headless Logical. Run browser in headless mode (TRUE) or with UI (FALSE)
+#'
 #' @examples
 #' \dontrun{
 #' browser <- rplaywright::new_webkit()
+#' browser_visible <- rplaywright::new_webkit(headless = FALSE)
 #' }
 #'
 #' @export
 new_webkit <- function(
-    start_server = T,
-    serverOptions = list(host = "127.0.0.1", port = 3000)
+    start_server = TRUE,
+    serverOptions = list(host = "127.0.0.1", port = 3000),
+    headless = TRUE
 ){
-  if (start_server == T) {
+  if (start_server == TRUE) {
     if (!exists("playwright_server", envir = envpw)) {
       start_server(host = serverOptions$host, port = serverOptions$port)
       Sys.sleep(5)
@@ -225,7 +252,11 @@ new_webkit <- function(
     }
   }
 
-  Browser$new("webkit")
+  Browser$new(
+    "webkit",
+    remote_url = paste0("http://", serverOptions$host, ":", serverOptions$port),
+    headless = headless
+  )
 }
 
 
@@ -258,7 +289,7 @@ new_page <- function(context) {
 
 #' Adds a script which would be evaluated in one of the following scenarios:
 #' @references
-#' * [https://erikaris.github.io/rplaywright/#add_init_script]
+#' * [https://erikaris.github.io/rplaywright/#add_init_script](https://erikaris.github.io/rplaywright/#add_init_script)
 #' @param page Page instance
 #' @examples
 #' \dontrun{
