@@ -5,7 +5,8 @@ Browser <- R6::R6Class(
     .type = NULL,
     .remote_url = NULL,
     .prefix = 'browser',
-    .meta = NULL
+    .meta = NULL,
+    .headless = TRUE  # AGREGAR: Variable privada para almacenar headless
   ),
   active = list(
     remote_url = function() {
@@ -25,7 +26,8 @@ Browser <- R6::R6Class(
     }
   ),
   public = list(
-    initialize = function(type, remote_url = "http://localhost:3000") {
+    # MODIFICAR: Agregar parámetro headless con valor por defecto TRUE
+    initialize = function(type, remote_url = "http://localhost:3000", headless = TRUE) {
       if (!(type %in% c("chromium", "firefox", "webkit"))) {
         logger::log_error(paste0(c(type, "is not supported. Supported type: ", supported_browser), collapse = "\n"))
         stop()
@@ -33,13 +35,18 @@ Browser <- R6::R6Class(
 
       private$.type <- type
       private$.remote_url <- remote_url
-
+      private$.headless <- headless  # AGREGAR: Guardar el valor
+      
       self$launch()
     },
+    # MODIFICAR: Actualizar launch para enviar headless al servidor
     launch = function() {
       resp <- httr::POST(
         paste0(self$remote_url, "/browser/new"),
-        body = list(type = private$.type),
+        body = list(
+          type = private$.type,
+          headless = private$.headless  # AGREGAR: Incluir headless en el body
+        ),
         encode = "json",
         httr::accept_json()
       )
