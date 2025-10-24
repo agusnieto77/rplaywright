@@ -21,10 +21,6 @@ const importTypes = require("./import-types");
 exports.browserPlugin = (instance, opts, next) => {
   instance.post(
     "/new",
-    /**
-     * @param {FastifyRequest<{ Body: LaunchBrowserRequestBody }>} request
-     * @param {FastifyReply<{ReplyType : LaunchBrowserResponse}>} reply
-     * */
     async function (request, reply) {
       if (!["chromium", "firefox", "webkit"].includes(request.body.type)) {
         reply
@@ -36,7 +32,15 @@ exports.browserPlugin = (instance, opts, next) => {
       }
 
       const b = new Browser();
-      await b.launch(request?.body?.type, { headless: false })
+      
+      // MODIFICAR: Leer headless del body, usar true por defecto
+      const headless = request.body.headless !== undefined 
+        ? request.body.headless 
+        : true;
+      
+      // MODIFICAR: Pasar headless al método launch
+      await b.launch(request?.body?.type, { headless: headless })
+      
       objs[b.id] = b;
       reply.type("application/json").send(b);
     }
